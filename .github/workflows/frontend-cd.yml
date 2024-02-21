@@ -82,10 +82,10 @@ jobs:
     - name: Build and Push Docker Image
       working-directory: starter/frontend
       env:
-        IMAGE_TAG: latest
-        REPO_NAME: frontend
+        IMAGE_TAG: ${{ github.sha }}
+        REPO_URI: ${{ secrets.FRONTEND_ECR_URI }}
       run: |
-        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag ${{ secrets.FRONTEND_ECR_URI }} .
+        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag $REPO_URI:$IMAGE_TAG .
         docker push ${{ secrets.FRONTEND_ECR_URI }}
 
     - name: Configure Kubeconfig
@@ -95,8 +95,8 @@ jobs:
     - name: Deploy Docker Image to Amazon EKS
       working-directory: starter/frontend/k8s
       env:
-        IMAGE_TAG: latest
-        REPO_NAME: frontend
+        IMAGE_TAG: ${{ github.sha }}
+        REPO_URI: ${{ secrets.FRONTEND_ECR_URI }}
       run: |
-          kustomize edit set image frontend=${{ secrets.FRONTEND_ECR_URI }}
+          kustomize edit set image frontend=$REPO_URI:$IMAGE_TAG
           kustomize build | kubectl apply -f -

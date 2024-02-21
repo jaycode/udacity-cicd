@@ -85,8 +85,8 @@ jobs:
         IMAGE_TAG: latest
         REPO_NAME: backend
       run: |
-        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag ${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
-        docker push ${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag $${{ secrets.BACKEND_ECR_URI }} .
+        docker push $${{ secrets.BACKEND_ECR_URI }}
 
     - name: Configure Kubeconfig
       run:
@@ -98,5 +98,5 @@ jobs:
         IMAGE_TAG: latest
         REPO_NAME: backend
       run: |
-          kustomize edit set image backend=${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+          kustomize edit set image backend=$${{ secrets.BACKEND_ECR_URI }}
           kustomize build | kubectl apply -f -

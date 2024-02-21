@@ -1,0 +1,102 @@
+name: Continuous Deployment - Back End
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/backend/**'
+  workflow_dispatch:
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.14]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: starter/backend/package-lock.json
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./starter/backend
+      - name: Lint
+        run: npm run lint
+        working-directory: ./starter/backend
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.14]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: starter/backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./starter/backend
+        
+      - name: Test
+        run: npm test
+        working-directory: ./starter/backend
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: starter/backend/package-lock.json
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+        aws-region: us-east-1
+
+    - name: Login to Amazon 
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and Push Docker Image
+      working-directory: starter/backend
+      env:
+        IMAGE_TAG: latest
+        REPO_NAME: backend
+      run: |
+        docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag ${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
+        docker push ${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+
+    - name: Configure Kubeconfig
+      run:
+        aws eks update-kubeconfig --name udacity-cicd/backend --region us-east-1
+
+    - name: Deploy Docker Image to Amazon EKS
+      working-directory: starter/backend/k8s
+      env:
+        IMAGE_TAG: latest
+        REPO_NAME: backend
+      run: |
+          kustomize edit set image backend=${{ github.sha }}.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+          kustomize build | kubectl apply -f -

@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Continuous Deployment - Front End
 
 on:
   pull_request:
@@ -51,7 +51,7 @@ jobs:
       - name: Test
         run: npm test
         working-directory: ./starter/frontend
-        
+
   build:
     needs: [lint, test]
     runs-on: ubuntu-latest

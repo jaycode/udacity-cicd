@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - run: nvm use
       - name: Install dependencies
         run: npm ci
       - name: Lint
@@ -36,6 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - run: nvm use
       - name: Install dependencies
         run: npm ci
       - name: Test

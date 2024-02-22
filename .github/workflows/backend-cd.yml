@@ -90,7 +90,7 @@ jobs:
 
     - name: Configure Kubeconfig
       run:
-        aws eks update-kubeconfig --name udacity-cicd/backend --region us-east-1
+        aws eks update-kubeconfig --name udacity-cicd-backend --region us-east-1
 
     - name: Deploy Docker Image to Amazon EKS
       working-directory: starter/backend/k8s

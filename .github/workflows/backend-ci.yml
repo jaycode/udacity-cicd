@@ -24,6 +24,7 @@ jobs:
         run: |
           pip install pipenv
           pipenv install --system --deploy
+          pip install flake8
         working-directory: ./starter/backend
       - name: Lint
         run: pipenv run lint

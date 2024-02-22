@@ -12,44 +12,43 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.14]
+        py-version: ["3.10"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Use Python ${{ matrix.py-version }}
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: starter/backend/package-lock.json
+          python-version: ${{ matrix.py-version }}
       - name: Install dependencies
-        run: npm install
+        run: |
+          pip install pipenv
+          pipenv install --system --deploy
+          pip install flake8
         working-directory: ./starter/backend
       - name: Lint
-        run: npm run lint
+        run: pipenv run lint
         working-directory: ./starter/backend
 
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.14]
+        py-version: ["3.10"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Use Python ${{ matrix.py-version }}
+        uses: actions/setup-python@v5
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: starter/backend/package-lock.json
-
+          python-version: ${{ matrix.py-version }}
       - name: Install dependencies
-        run: npm install
+        run: |
+          pip install pipenv
+          pipenv install --system --deploy
         working-directory: ./starter/backend
-        
       - name: Test
-        run: npm test
+        run: pipenv run test
         working-directory: ./starter/backend
 
   build:
@@ -59,14 +58,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: starter/backend/package-lock.json
-
+  
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:

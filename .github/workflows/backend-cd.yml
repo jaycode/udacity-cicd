@@ -78,7 +78,7 @@ jobs:
         REPO_URI: ${{ secrets.BACKEND_ECR_URI }}
       run: |
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag $REPO_URI:$IMAGE_TAG .
-        docker push $REPO_NAME:$IMAGE_TAG
+        docker push $REPO_URI:$IMAGE_TAG
 
     - name: Configure Kubeconfig
       env:

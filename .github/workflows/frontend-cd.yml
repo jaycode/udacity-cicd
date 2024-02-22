@@ -89,8 +89,10 @@ jobs:
         docker push $REPO_URI:$IMAGE_TAG
 
     - name: Configure Kubeconfig
+      env:
+        EKS_NAME: ${{secrets.FRONTEND_EKS_NAME}}
       run:
-        aws eks update-kubeconfig --name udacity-cicd-frontend --region us-east-1
+        aws eks update-kubeconfig --name $EKS_NAME --region us-east-1
 
     - name: Deploy Docker Image to Amazon EKS
       working-directory: starter/frontend/k8s

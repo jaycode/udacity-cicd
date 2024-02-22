@@ -97,10 +97,11 @@ jobs:
         EKS_NAME: ${{ vars.FRONTEND_EKS_NAME }}
       run:
         aws eks update-kubeconfig --name $EKS_NAME --region us-east-1
-    
-    - name: Configure AWS IAM Permissions for Kubernetes
-      working-directory: setup
-      run: ./init.sh
+        
+    # Run this once, locally, instead.
+    # - name: Configure AWS IAM Permissions for Kubernetes
+    #   working-directory: setup
+    #   run: ./init.sh
 
     - name: Deploy Docker Image to Amazon EKS
       working-directory: starter/frontend/k8s

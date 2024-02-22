@@ -75,14 +75,14 @@ jobs:
       working-directory: starter/backend
       env:
         IMAGE_TAG: ${{ github.sha }}
-        REPO_URI: ${{ secrets.BACKEND_ECR_URI }}
+        REPO_URI: ${{ vars.BACKEND_ECR_URI }}
       run: |
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag $REPO_URI:$IMAGE_TAG .
         docker push $REPO_URI:$IMAGE_TAG
 
     - name: Configure Kubeconfig
       env:
-        EKS_NAME: ${{ secrets.BACKEND_EKS_NAME }}
+        EKS_NAME: ${{ vars.BACKEND_EKS_NAME }}
       run:
         aws eks update-kubeconfig --name $EKS_NAME --region us-east-1
 
@@ -90,7 +90,7 @@ jobs:
       working-directory: starter/backend/k8s
       env:
         IMAGE_TAG: ${{ github.sha }}
-        REPO_URI: ${{ secrets.BACKEND_ECR_URI }}
+        REPO_URI: ${{ vars.BACKEND_ECR_URI }}
       run: |
           kustomize edit set image backend=$REPO_URI:$IMAGE_TAG
           kustomize build | kubectl apply -f -
